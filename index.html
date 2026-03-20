@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BMI Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green: #00ff88;
+      --green-dim: #00cc66;
+      --green-glow: rgba(0,255,136,0.3);
+      --black: #000000;
+      --dark: #080f0a;
+      --card: #0d1a10;
+      --border: rgba(0,255,136,0.25);
+      --text: #e0ffe8;
+      --muted: #5a8f6a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    /* Animated grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,136,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      max-width: 900px;
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(0,255,136,0.1), inset 0 0 60px rgba(0,0,0,0.5);
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      background: linear-gradient(160deg, #000a04 0%, #001a0a 100%);
+      padding: 48px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      left: -60px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(0,255,136,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .brand {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      letter-spacing: 5px;
+      color: var(--green);
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      opacity: 0.7;
+    }
+
+    /* Human body SVG icon */
+    .human-icon {
+      width: 140px;
+      height: 220px;
+      margin-bottom: 32px;
+      filter: drop-shadow(0 0 12px rgba(0,255,136,0.5));
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { filter: drop-shadow(0 0 10px rgba(0,255,136,0.4)); }
+      50%      { filter: drop-shadow(0 0 22px rgba(0,255,136,0.8)); }
+    }
+
+    .stat-block {
+      width: 100%;
+      background: rgba(0,255,136,0.05);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin-top: 8px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+    }
+
+    .stat-value span {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 4px;
+    }
+
+    .bmi-category {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 6px;
+      color: var(--green);
+      min-height: 16px;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel {
+      background: var(--card);
+      padding: 48px 40px;
+    }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--green);
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      margin-bottom: 36px;
+    }
+
+    /* Toggle */
+    .unit-toggle {
+      display: flex;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .unit-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .unit-btn.active {
+      background: var(--green);
+      color: #000;
+      font-weight: 700;
+    }
+
+    /* Fields */
+    .field-group { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-wrap {
+      position: relative;
+      flex: 1;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'Orbitron', monospace;
+      font-size: 16px;
+      padding: 12px 44px 12px 14px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    input[type="number"]:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 2px var(--green-glow);
+    }
+
+    .unit-tag {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      color: var(--muted);
+      pointer-events: none;
+      letter-spacing: 1px;
+    }
+
+    select {
+      width: 100%;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 15px;
+      padding: 12px 14px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    select:focus { border-color: var(--green); }
+    select option { background: #0d1a10; }
+
+    /* Calculate Button */
+    .calc-btn {
+      width: 100%;
+      margin-top: 28px;
+      padding: 16px;
+      background: var(--green);
+      border: none;
+      border-radius: 3px;
+      color: #000;
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .calc-btn::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -60%;
+      width: 30%; height: 200%;
+      background: rgba(255,255,255,0.25);
+      transform: skewX(-20deg);
+      transition: left 0.4s ease;
+    }
+
+    .calc-btn:hover { background: #00ffaa; box-shadow: 0 0 24px rgba(0,255,136,0.5); }
+    .calc-btn:hover::before { left: 140%; }
+    .calc-btn:active { transform: scale(0.98); }
+
+    /* BMI Scale Bar */
+    .scale-bar {
+      margin-top: 28px;
+      display: none;
+    }
+
+    .scale-bar.visible { display: block; animation: slideUp 0.4s ease; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .scale-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .scale-track {
+      height: 8px;
+      border-radius: 4px;
+      background: linear-gradient(to right, #4fc3f7 0%, #00e676 30%, #ffee58 55%, #ff7043 80%, #ef5350 100%);
+      position: relative;
+      overflow: visible;
+    }
+
+    .scale-marker {
+      position: absolute;
+      top: -4px;
+      width: 16px; height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      border: 3px solid #000;
+      box-shadow: 0 0 8px rgba(0,255,136,0.8);
+      transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Advice card */
+    .advice-card {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: rgba(0,255,136,0.06);
+      border-left: 3px solid var(--green);
+      border-radius: 0 3px 3px 0;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+      display: none;
+    }
+
+    .advice-card.visible { display: block; animation: slideUp 0.5s ease 0.2s both; }
+
+    /* Underweight */
+    .cat-underweight { color: #4fc3f7; border-color: #4fc3f7; }
+    .cat-normal      { color: var(--green); border-color: var(--green); }
+    .cat-overweight  { color: #ffee58; border-color: #ffee58; }
+    .cat-obese1      { color: #ff7043; border-color: #ff7043; }
+    .cat-obese2      { color: #ef5350; border-color: #ef5350; }
+
+    /* Error */
+    .error-msg {
+      color: #ff5252;
+      font-size: 12px;
+      letter-spacing: 1px;
+      margin-top: 8px;
+      min-height: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .wrapper { grid-template-columns: 1fr; }
+      .left-panel { border-right: none; border-bottom: 1px solid var(--border); padding: 36px 28px; }
+      .right-panel { padding: 36px 28px; }
+      .human-icon { width: 100px; height: 160px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="brand">Health Monitor</div>
+
+    <!-- Human body SVG -->
+    <svg class="human-icon" viewBox="0 0 100 170" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#00ff88;stop-opacity:1"/>
+          <stop offset="100%" style="stop-color:#00aa55;stop-opacity:1"/>
+        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- Head -->
+      <circle cx="50" cy="16" r="14" fill="none" stroke="url(#bodyGrad)" stroke-width="2.5" filter="url(#glow)"/>
+      <!-- Neck -->
+      <line x1="50" y1="30" x2="50" y2="38" stroke="url(#bodyGrad)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Shoulders -->
+      <path d="M50 38 L22 52 M50 38 L78 52" stroke="url(#bodyGrad)" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Upper body (torso) -->
+      <path d="M28 50 Q22 68 24 85 Q36 92 50 92 Q64 92 76 85 Q78 68 72 50 Q60 44 50 44 Q40 44 28 50Z"
+            fill="none" stroke="url(#bodyGrad)" stroke-width="2.5" stroke-linejoin="round" filter="url(#glow)"/>
+      <!-- Belt / waist line -->
+      <line x1="26" y1="82" x2="74" y2="82" stroke="url(#bodyGrad)" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.5"/>
+      <!-- Left arm -->
+      <path d="M28 52 Q14 68 16 86 Q18 92 22 92" stroke="url(#bodyGrad)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <!-- Right arm -->
+      <path d="M72 52 Q86 68 84 86 Q82 92 78 92" stroke="url(#bodyGrad)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <!-- Left hand -->
+      <circle cx="21" cy="94" r="4" fill="none" stroke="url(#bodyGrad)" stroke-width="2"/>
+      <!-- Right hand -->
+      <circle cx="79" cy="94" r="4" fill="none" stroke="url(#bodyGrad)" stroke-width="2"/>
+      <!-- Hips -->
+      <path d="M24 85 Q32 96 34 100 Q50 102 66 100 Q68 96 76 85" stroke="url(#bodyGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- Left leg -->
+      <path d="M34 100 Q28 124 28 148 Q28 156 32 158" stroke="url(#bodyGrad)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <!-- Right leg -->
+      <path d="M66 100 Q72 124 72 148 Q72 156 68 158" stroke="url(#bodyGrad)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <!-- Left foot -->
+      <path d="M28 156 Q22 162 20 164 Q20 167 32 167" stroke="url(#bodyGrad)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Right foot -->
+      <path d="M72 156 Q78 162 80 164 Q80 167 68 167" stroke="url(#bodyGrad)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Heart beat line -->
+      <polyline points="30,70 36,70 39,62 42,78 45,65 48,72 52,72 58,70" fill="none" stroke="url(#bodyGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+    </svg>
+
+    <div class="stat-block">
+      <div class="stat-label">BMI Score</div>
+      <div class="stat-value" id="bmi-display">— <span>kg/m²</span></div>
+      <div class="bmi-category" id="bmi-cat"></div>
+    </div>
+
+    <div class="stat-block" style="margin-top:12px;">
+      <div class="stat-label">Ideal Weight Range</div>
+      <div class="stat-value" style="font-size:18px;" id="ideal-display">— <span>kg</span></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <h1>BMI CALC</h1>
+    <div class="subtitle">Body Mass Index Calculator</div>
+
+    <!-- Unit Toggle -->
+    <div class="unit-toggle">
+      <button class="unit-btn active" id="btn-metric" onclick="setUnit('metric')">Metric (kg/cm)</button>
+      <button class="unit-btn" id="btn-imperial" onclick="setUnit('imperial')">Imperial (lb/in)</button>
+    </div>
+
+    <!-- Gender -->
+    <div class="field-group">
+      <label>Gender</label>
+      <select id="gender">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+        <option value="other">Other / Prefer not to say</option>
+      </select>
+    </div>
+
+    <!-- Age -->
+    <div class="field-group">
+      <label>Age</label>
+      <div class="input-wrap">
+        <input type="number" id="age" placeholder="25" min="2" max="120"/>
+        <span class="unit-tag">yrs</span>
+      </div>
+    </div>
+
+    <!-- Height -->
+    <div class="field-group">
+      <label>Height</label>
+      <div class="input-row" id="height-row">
+        <div class="input-wrap">
+          <input type="number" id="height-primary" placeholder="170" min="1"/>
+          <span class="unit-tag" id="h-unit1">cm</span>
+        </div>
+        <div class="input-wrap" id="height-secondary-wrap" style="display:none;">
+          <input type="number" id="height-secondary" placeholder="0" min="0"/>
+          <span class="unit-tag" id="h-unit2">in</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weight -->
+    <div class="field-group">
+      <label>Weight</label>
+      <div class="input-wrap">
+        <input type="number" id="weight" placeholder="70" min="1" step="0.1"/>
+        <span class="unit-tag" id="w-unit">kg</span>
+      </div>
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+
+    <button class="calc-btn" onclick="calculate()">Calculate BMI</button>
+
+    <!-- Scale bar -->
+    <div class="scale-bar" id="scale-bar">
+      <div class="scale-label-row">
+        <span>Underweight</span><span>Normal</span><span>Overweight</span><span>Obese</span>
+      </div>
+      <div class="scale-track">
+        <div class="scale-marker" id="scale-marker" style="left:0%"></div>
+      </div>
+    </div>
+
+    <!-- Advice -->
+    <div class="advice-card" id="advice-card"></div>
+  </div>
+
+</div>
+
+<script>
+  let unit = 'metric';
+
+  function setUnit(u) {
+    unit = u;
+    document.getElementById('btn-metric').classList.toggle('active', u === 'metric');
+    document.getElementById('btn-imperial').classList.toggle('active', u === 'imperial');
+
+    const secWrap = document.getElementById('height-secondary-wrap');
+    const h1 = document.getElementById('h-unit1');
+    const wUnit = document.getElementById('w-unit');
+    const hPrimary = document.getElementById('height-primary');
+
+    if (u === 'metric') {
+      h1.textContent = 'cm';
+      wUnit.textContent = 'kg';
+      hPrimary.placeholder = '170';
+      secWrap.style.display = 'none';
+    } else {
+      h1.textContent = 'ft';
+      wUnit.textContent = 'lb';
+      hPrimary.placeholder = '5';
+      secWrap.style.display = 'block';
+    }
+
+    resetResult();
+  }
+
+  function resetResult() {
+    document.getElementById('bmi-display').innerHTML = '— <span>kg/m²</span>';
+    document.getElementById('bmi-cat').textContent = '';
+    document.getElementById('ideal-display').innerHTML = '— <span>' + (unit === 'metric' ? 'kg' : 'lb') + '</span>';
+    document.getElementById('scale-bar').classList.remove('visible');
+    document.getElementById('advice-card').classList.remove('visible');
+    document.getElementById('error-msg').textContent = '';
+  }
+
+  function calculate() {
+    const err = document.getElementById('error-msg');
+    err.textContent = '';
+
+    const age = parseFloat(document.getElementById('age').value);
+    const weight = parseFloat(document.getElementById('weight').value);
+    let heightM;
+
+    if (unit === 'metric') {
+      const cm = parseFloat(document.getElementById('height-primary').value);
+      if (!cm || cm < 50 || cm > 280) { err.textContent = '⚠ Enter a valid height (50–280 cm)'; return; }
+      heightM = cm / 100;
+    } else {
+      const ft = parseFloat(document.getElementById('height-primary').value) || 0;
+      const inc = parseFloat(document.getElementById('height-secondary').value) || 0;
+      const totalIn = ft * 12 + inc;
+      if (totalIn < 20 || totalIn > 110) { err.textContent = '⚠ Enter a valid height'; return; }
+      heightM = totalIn * 0.0254;
+    }
+
+    const weightKg = unit === 'metric' ? weight : weight * 0.453592;
+
+    if (!age || age < 2 || age > 120) { err.textContent = '⚠ Enter a valid age (2–120)'; return; }
+    if (!weight || weight <= 0) { err.textContent = '⚠ Enter a valid weight'; return; }
+
+    const bmi = weightKg / (heightM * heightM);
+    const bmiRounded = Math.round(bmi * 10) / 10;
+
+    // Ideal weight (BMI 18.5–24.9)
+    const idealLow  = Math.round(18.5 * heightM * heightM * 10) / 10;
+    const idealHigh = Math.round(24.9 * heightM * heightM * 10) / 10;
+
+    // Category
+    let cat, catClass, advice, markerPct;
+    if (bmi < 18.5) {
+      cat = 'Underweight'; catClass = 'cat-underweight'; markerPct = Math.max(2, (bmi / 18.5) * 20);
+      advice = `Your BMI suggests you may be underweight. Consider consulting a nutritionist to develop a healthy, balanced diet plan that supports gradual weight gain. Focus on nutrient-dense foods and strength training.`;
+    } else if (bmi < 25) {
+      cat = 'Normal Weight'; catClass = 'cat-normal'; markerPct = 20 + ((bmi - 18.5) / 6.5) * 30;
+      advice = `Great news — your BMI is in the healthy range! Maintain your weight through a balanced diet, regular physical activity (150+ min/week), and adequate sleep. Keep up the excellent work!`;
+    } else if (bmi < 30) {
+      cat = 'Overweight'; catClass = 'cat-overweight'; markerPct = 50 + ((bmi - 25) / 5) * 20;
+      advice = `Your BMI indicates overweight. Small changes make a big difference: aim for a modest calorie deficit, increase daily movement, prioritize whole foods, and reduce processed sugars. Consult your doctor for a personalized plan.`;
+    } else if (bmi < 35) {
+      cat = 'Obese (Class I)'; catClass = 'cat-obese1'; markerPct = 70 + ((bmi - 30) / 5) * 15;
+      advice = `BMI indicates Class I Obesity. This range carries increased health risks. Seek guidance from a healthcare professional for a structured weight-loss program including dietary changes, regular exercise, and behavioral support.`;
+    } else {
+      cat = 'Obese (Class II+)'; catClass = 'cat-obese2'; markerPct = Math.min(97, 85 + (bmi - 35) * 1.2);
+      advice = `BMI indicates Class II+ Obesity. Please consult a medical professional promptly. Structured intervention, medical supervision, and lifestyle changes are strongly recommended to reduce health risks.`;
+    }
+
+    // Update left panel
+    const bmiDisplay = document.getElementById('bmi-display');
+    bmiDisplay.innerHTML = `${bmiRounded} <span>kg/m²</span>`;
+
+    const catEl = document.getElementById('bmi-cat');
+    catEl.textContent = cat;
+    catEl.className = 'bmi-category ' + catClass;
+
+    const idealDisplay = document.getElementById('ideal-display');
+    if (unit === 'metric') {
+      idealDisplay.innerHTML = `${idealLow}–${idealHigh} <span>kg</span>`;
+    } else {
+      const loLb = Math.round(idealLow / 0.453592);
+      const hiLb = Math.round(idealHigh / 0.453592);
+      idealDisplay.innerHTML = `${loLb}–${hiLb} <span>lb</span>`;
+    }
+
+    // Scale bar
+    document.getElementById('scale-bar').classList.add('visible');
+    setTimeout(() => {
+      document.getElementById('scale-marker').style.left = markerPct + '%';
+    }, 50);
+
+    // Advice
+    const adviceCard = document.getElementById('advice-card');
+    adviceCard.textContent = advice;
+    adviceCard.className = 'advice-card visible ' + catClass;
+  }
+
+  // Allow Enter key
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+</script>
+</body>
+</html>
